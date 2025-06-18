@@ -36,6 +36,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//This only shows events occuring in the future. I may delete events that have already occured later.
 func getEvents(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 	w.Header().Set("Access-Control-Allow-Origin","*")
 	formParseError := r.ParseForm()
@@ -56,7 +57,7 @@ func getEvents(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 		if filterParam {
 			switch filter[0] {
 			case "all":
-				requestedRows, selectErr = conn.Query(context.Background(), "SELECT * FROM events ORDER BY eventDatetime;")
+				requestedRows, selectErr = conn.Query(context.Background(), "SELECT * FROM events WHERE eventDatetime > $1 ORDER BY eventDatetime;", currentTime)
 		} else {
 			requestedRows, selectErr = conn.Query(context.Background(), "SELECT * FROM events ORDER BY eventDatetime;")
 		}
