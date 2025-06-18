@@ -1,5 +1,5 @@
 package events
-//TODO: check if I need to convert received datetime information in the Form in the Request type from string to Time.time
+//TODO: check if I need to convert received datetime information in the Form in the Request type from string to Time.time. I don't think this is necessary when using built in Marshalling and Unmarshalling functions. There is a MarshalText encoder associated with the time.Time type.
 import(
 	"context"
 	"fmt"
@@ -52,6 +52,7 @@ func getEvents(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 	if read {
 		filter, filterParam := r.Form["filter"]
 		var selectErr error
+		currentTime := time.Now()
 		if filterParam {
 			switch filter[0] {
 			case "all":

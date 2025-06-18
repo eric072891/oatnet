@@ -63,7 +63,7 @@ func main(){
 			eventName TEXT NOT NULL,
 			description TEXT, //describes the event. "We plan to get together to learn the ukelele."
 			location TEXT,
-			eventDatetime DATETIME NOT NULL,
+			eventDatetime TIMESTAMP NOT NULL,
 			PRIMARY KEY (eventName, eventDate)
 		);`)
 		adminPassword := rand.Text()
