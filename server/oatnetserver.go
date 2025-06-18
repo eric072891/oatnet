@@ -3,6 +3,7 @@ package main
 import(
 	"github.com/nadams128/oatnet/server/inventory"
 	"github.com/nadams128/oatnet/server/auth"
+	"github.com/nadams128/oatnet/server/events"
 	"net/http"
 	"fmt"
 	"bufio"
@@ -28,6 +29,7 @@ func main(){
 		fmt.Println("Starting Oatnet Server")
 		http.HandleFunc("/inv", inventory.RequestHandler)
 		http.HandleFunc("/auth", auth.RequestHandler)
+		http.HandleFunc("/events", events.RequestHandler)
 		http.ListenAndServe(":8080", nil)
 	} else if userInput == "reformat" {
 		conn, _ := pgx.Connect(context.Background(), "postgres://oatnet:password@127.0.0.1/oatnet")
@@ -35,6 +37,7 @@ func main(){
 		_, execErr := conn.Exec(context.Background(), "DROP TABLE IF EXISTS inventory;")
 		_, execErr = conn.Exec(context.Background(), "DROP TABLE IF EXISTS users;")
 		_, execErr = conn.Exec(context.Background(), "DROP TABLE IF EXISTS sessions;")
+		_, execErr = conn.Exec(context.Background(), "DROP TABLE IF EXISTS events;")
 		_, execErr = conn.Exec(context.Background(), `CREATE TABLE inventory(
 			name TEXT UNIQUE NOT NULL PRIMARY KEY,
 			have REAL NOT NULL CHECK(have >= 0),
@@ -54,6 +57,14 @@ func main(){
 		_, execErr = conn.Exec(context.Background(), `CREATE TABLE sessions(
 			sessionid TEXT UNIQUE NOT NULL PRIMARY KEY,
 			username TEXT NOT NULL
+		);`)
+		// The table below stores information on upcoming events (meetings, gatherings, workshops, anything). The table will not store events that have already occured.
+		_, execErr = conn.Exec(context.Background(), `CREATE TABLE events(
+			eventName TEXT NOT NULL,
+			description TEXT, //describes the event. "We plan to get together to learn the ukelele."
+			location TEXT,
+			eventDatetime DATETIME NOT NULL,
+			PRIMARY KEY (eventName, eventDate)
 		);`)
 		adminPassword := rand.Text()
 		hash, _ := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
